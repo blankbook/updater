@@ -34,11 +34,12 @@ func main() {
 func UpdateRanks(db *sql.DB) {
     query :=`
         UPDATE a 
-        SET Rank = b.NewRank
+        SET OldRank=Rank, Rank=b.NewRank
         FROM Posts a 
         INNER JOIN 
             (SELECT Score, RANK() OVER (ORDER BY Score DESC) AS NewRank FROM Posts) b
-        ON a.Score = b.Score`
+        ON a.Score = b.Score
+        UPDATE State SET LastRankUpdateTime=(DATEDIFF(SECOND, '19700101', GETUTCDATE()))`
     _, err := db.Exec(query)
     if err != nil {
         log.Printf(err.Error())
