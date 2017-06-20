@@ -33,11 +33,15 @@ func main() {
 
 func UpdateRanks(db *sql.DB) {
     query :=`
+        DECLARE @curtime BIGINT
+        SET @curtime = (DATEDIFF(SECOND, '19700101', GETUTCDATE()))
         UPDATE a 
         SET OldRank=Rank, Rank=b.NewRank
         FROM Posts a 
         INNER JOIN 
-            (SELECT Score, RANK() OVER (ORDER BY Score DESC) AS NewRank FROM Posts) b
+            (SELECT Score, RANK() 
+             OVER (ORDER BY (SELECT ((CAST([Score] as float)) / (@curtime - Time + 100))) DESC)
+             AS NewRank FROM Posts) b
         ON a.Score = b.Score
         UPDATE State SET RankVersion=RankVersion+1`
     _, err := db.Exec(query)
