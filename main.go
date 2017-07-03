@@ -40,7 +40,7 @@ func UpdateRanks(db *sql.DB) {
         FROM Posts a 
         INNER JOIN 
             (SELECT Score, ROW_NUMBER() 
-             OVER (ORDER BY (SELECT ((CAST([Score] as float)) / (@curtime - Time + 100))) DESC)
+             OVER (ORDER BY (SELECT ((CAST([Score] as float) + 100) / (@curtime - Time + 100))) DESC)
              AS NewRank FROM Posts) b
         ON a.Score = b.Score
         UPDATE State SET RankVersion=RankVersion+1`
